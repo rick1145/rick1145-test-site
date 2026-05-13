@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>28星宿 · 空间能量星盘</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg: #0b0a08;
+            --surface: #181510;
+            --surface-light: #221e18;
+            --gold: #c9a85b;
+            --gold-light: #e0c97f;
+            --gold-dim: #8b7a56;
+            --text: #e6ddcc;
+            --text-secondary: #b8aa8c;
+            --red: #c0392b;
+            --orange: #e67e22;
+            --yellow: #f1c40f;
+            --light-green: #2ecc71;
+            --deep-green: #1e8449;
+            --border: #362f23;
+            --shadow: 0 8px 32px rgba(0,0,0,0.6);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(201,168,91,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(201,168,91,0.05) 0%, transparent 40%);
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            color: var(--text);
+            padding: 20px 16px 40px;
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--gold-light);
+            text-shadow: 0 2px 8px rgba(201,168,91,0.2);
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: var(--gold-dim);
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+        .legend-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 8px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .legend-dot {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            gap: 4px;
+            transition: all var(--transition);
+        }
+        .legend-dot:hover { color: var(--gold-light); }
+        .legend-dot span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .group-heading {
+            background: linear-gradient(135deg, rgba(201,168,91,0.1) 0%, rgba(201,168,91,0.02) 100%);
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            margin: 24px 0 12px;
+            letter-spacing: 1.5px;
+            border-left: 3px solid var(--gold);
+            color: var(--gold-light);
+            backdrop-filter: blur(4px);
+        }
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .question-card:hover {
+            border-color: var(--gold-dim);
+            box-shadow: 0 4px 20px rgba(201,168,91,0.1);
+            transform: translateY(-1px);
+        }
+        .question-label {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #f0e6d3;
+        }
+        .question-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        /* 自定义下拉选择 */
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .question-card select {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            background: var(--surface-light);
+            color: var(--text);
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c9a85b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+        .question-card select:hover {
+            border-color: var(--gold-dim);
+            background: #261f15;
+        }
+        .question-card select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,91,0.2);
+        }
+        .btn-generate {
+            width: 100%;
+            padding: 18px;
+            margin: 28px 0 20px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #c9a85b 0%, #a8863c 100%);
+            color: #0b0a08;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 20px rgba(201,168,91,0.3);
+        }
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201,168,91,0.5);
+            background: linear-gradient(135deg, #ddbc6c 0%, #b9994d 100%);
+        }
+        .btn-generate:active {
+            transform: translateY(0);
+            transition: 0.1s;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+        }
+        .stat-card:hover {
+            border-color: var(--gold-dim);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--gold-light);
+            text-shadow: 0 0 10px rgba(201,168,91,0.4);
+        }
+        .stat-bar {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 8px;
+            background: var(--border);
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .chart-container.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #sunburst-chart {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+        }
+        .reading-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reading-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .reading-box h3 {
+            font-size: 16px;
+            color: var(--gold-light);
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+        .reading-box p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot-inline {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px currentColor;
+        }
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: #3e3729;
+            margin-top: 40px;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 24px; }
+            .stat-value { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 头部 ========== -->
+<div class="header">
+    <h1>✦ 28星宿空间能量诊断 ✦</h1>
+    <div class="subtitle">请为每道题打分（1最差 ~ 5最好）</div>
+</div>
+
+<!-- ========== 颜色图例 ========== -->
+<div class="legend-bar">
+    <div class="legend-dot"><span style="background:#c0392b;"></span> 1分 严重不足</div>
+    <div class="legend-dot"><span style="background:#e67e22;"></span> 2分 有待改善</div>
+    <div class="legend-dot"><span style="background:#f1c40f;"></span> 3分 基本合格</div>
+    <div class="legend-dot"><span style="background:#2ecc71;"></span> 4分 做得不错</div>
+    <div class="legend-dot"><span style="background:#1e8449;"></span> 5分 非常理想</div>
+</div>
+
+<!-- ========== 题目区域（JS动态生成） ========== -->
+<div id="questions-area"></div>
+
+<!-- ========== 生成按钮 ========== -->
+<button class="btn-generate" onclick="generateChart()">✦ 生成我的星盘图 ✦</button>
+
+<!-- ========== 四组统计 ========== -->
+<div class="stats-grid" id="stats-area"></div>
+
+<!-- ========== 旭日图容器 ========== -->
+<div class="chart-container" id="chart-wrapper">
+    <div id="sunburst-chart"></div>
+</div>
+
+<!-- ========== 解读 ========== -->
+<div class="reading-box" id="reading-area">
+    <h3>✦ 星盘解读</h3>
+    <div id="reading-content"></div>
+</div>
+
+<footer>本工具为一次性本地计算 · 不保存任何数据</footer>
+
+<script>
+(function() {
+    // ==================== 题目数据 ====================
+    const questions = [
+        { group: '东方青龙·空间基础', star: '角宿·文昌位', title: '家中是否有固定的学习、创作或深度工作空间？', hints: ['没有独立学习区','有书桌但堆满杂物','基本但效率一般','固定学习角使用频率高','拥有独立书房环境安静'] },
+        { group: '东方青龙·空间基础', star: '亢宿·门面位', title: '大门和玄关给人的第一感觉如何？', hints: ['堆满鞋杂物','比较拥挤','整齐但缺温度','整洁清爽','整洁温暖进门安心'] },
+        { group: '东方青龙·空间基础', star: '氐宿·根基位', title: '客厅是否让人想待下来？', hints: ['堆满杂物无人停留','被包围缺围坐感','正常但各玩手机','舒适愿意一起待','家的能量中心'] },
+        { group: '东方青龙·空间基础', star: '房宿·养蓄位', title: '厨房和餐厅状态如何？', hints: ['油腻杂乱不想进','能做饭但收纳乱','厨房整洁但少用','干净明亮享受做饭','补给站有仪式感'] },
+        { group: '东方青龙·空间基础', star: '心宿·决策位', title: '主卧是否睡得安稳？', hints: ['堆满杂物常失眠','功能混杂睡眠一般','干净但缺安心感','舒适安静一觉天亮','最放松的空间'] },
+        { group: '东方青龙·空间基础', star: '尾宿·生长位', title: '孩子是否有自由活动的空间？', hints: ['无独立活动空间','有但利用不合理','基本满足缺玩耍角','分区合理有学有玩','自由成长有秩序有创造力'] },
+        { group: '东方青龙·空间基础', star: '箕宿·吐故位', title: '阳台或户外空间状态如何？', hints: ['堆满杂物失功能','能晾衣但乱','整洁但无欲望坐','干净清爽偶尔用','透气口有绿植每天待'] },
+        { group: '北方玄武·空间内功', star: '斗宿·权衡位', title: '重要文件是否有固定管理位置？', hints: ['到处乱放','有但分类乱','固定但不好找','分类清晰集中','科学档案+备份'] },
+        { group: '北方玄武·空间内功', star: '牛宿·耕耘位', title: '是否有每天固定学习的角落？', hints: ['无专属角落','不固定三天打鱼','基本能静心','固定每天1小时','一方天地能深耕'] },
+        { group: '北方玄武·空间内功', star: '女宿·巧思位', title: '是否有手工/创作空间？', hints: ['没地方做手工','能做但每次要收拾','有位置但不顺手','固定创作角工具齐全','创作是生活一部分'] },
+        { group: '北方玄武·空间内功', star: '虚宿·静定位', title: '是否有彻底放松、打坐的空间？', hints: ['在家无法放松','偶尔能闲下来但不稳','有个角落但不常用','固定的放松角','独处充电的精神空间'] },
+        { group: '北方玄武·空间内功', star: '危宿·惕厉位', title: '家中是否有应急准备？', hints: ['没任何应急准备','有但不知道在哪','有基本急救包','有备灾物品过期有查','全面+家人培训+定期检查'] },
+        { group: '北方玄武·空间内功', star: '室宿·安寝位', title: '睡眠空间是否纯粹舒适？', hints: ['卧室混乱睡不好','有床但干扰多','基本干净偶尔失眠','安静舒适一觉到天亮','纯粹睡眠空间'] },
+        { group: '北方玄武·空间内功', star: '壁宿·护卫位', title: '家庭边界感是否清晰？', hints: ['无边界随时被打扰','有意识但守不住','基本能区分','有独立空间家人尊重','完美平衡'] },
+        { group: '西方白虎·空间功能', star: '奎宿·调度位', title: '家的动线是否合理？', hints: ['动线混乱经常撞到','动线勉强通但绕路','基本合理但效率低','动线顺畅功能分区好','行云流水'] },
+        { group: '西方白虎·空间功能', star: '娄宿·联络位', title: '是否有和家人联络互动的空间？', hints: ['各回各房间无交流','有位置但不习惯用','偶尔在一起各玩手机','常一起聊天做活动','家的感情黏合剂'] },
+        { group: '西方白虎·空间功能', star: '胃宿·吸收位', title: '食物储存和饮食健康管理系统如何？', hints: ['冰箱塞满过期食品','有食材但管理混乱','基本能管理但缺计划','冰箱整洁定期采购','健康饮食管理系统'] },
+        { group: '西方白虎·空间功能', star: '昴宿·威仪位', title: '家中入口处的气场如何？', hints: ['入口就是鞋柜堆满','平淡无感','整齐但没存在感','进入有"啊到家了"感','进门就被治愈'] },
+        { group: '西方白虎·空间功能', star: '毕宿·捕获位', title: '家中是否有高效完成工作/事务的区域？', hints: ['在家完全无法工作','有位置但分心多','基本能完成但慢','固定工作区效率高','能进入心流状态'] },
+        { group: '西方白虎·空间功能', star: '觜宿·精微位', title: '是否有维修工具角？', hints: ['无工具','少量但散落','收纳盒够日常','齐全固定位置','骄傲的工具角'] },
+        { group: '西方白虎·空间功能', star: '参宿·交割位', title: '是否定期清理不需要的东西？', hints: ['多年不清理','下不了决心','一年一次大扫除','每季度清理','断舍离生活常态'] },
+        { group: '南方朱雀·空间关系', star: '井宿·滋养位', title: '餐桌使用频率和聚餐氛围如何？', hints: ['很少在家吃饭','偶尔吃各吃各','有时围坐气氛一般','每天一餐围坐有笑','情感中心'] },
+        { group: '南方朱雀·空间关系', star: '鬼宿·静思位', title: '是否有独处安心的私密空间？', hints: ['没有独处空间','偶尔能安静不稳定','相对私密但要抢','属于自己的角落','独处共处完美平衡'] },
+        { group: '南方朱雀·空间关系', star: '柳宿·柔美位', title: '家中是否有展示审美和爱好的空间？', hints: ['没有任何审美表达','想布置不知怎么下手','有装饰但不太搭','喜欢的元素看着开心','每个角落有生活感'] },
+        { group: '南方朱雀·空间关系', star: '星宿·闪耀位', title: '家人的成就和美好记忆是否被展示？', hints: ['收在箱子里','偶尔展示','部分但非全家人','荣誉墙人人被看见','家庭博物馆'] },
+        { group: '南方朱雀·空间关系', star: '张宿·汇聚位', title: '客厅是否能容纳亲友围坐交流？', hints: ['不好意思请朋友来','能坐但不舒服','能招待但体验一般','朋友来了不想走','朋友聚点'] },
+        { group: '南方朱雀·空间关系', star: '翼宿·望远位', title: '家中是否有让人心胸开阔的位置？', hints: ['窗外是墙','有点景但常关窗','偶尔望远心情好','刻意放椅子每天望远','充电的地方'] },
+        { group: '南方朱雀·空间关系', star: '轸宿·归整位', title: '家人用完东西是否能及时归位？', hints: ['随手放很快乱','自己尽量但家人没有','大部分能偶尔偷懒','全家都有归位习惯','自然默契'] }
+    ];
+
+    const colorMap = { 1:'#c0392b', 2:'#e67e22', 3:'#f1c40f', 4:'#2ecc71', 5:'#1e8449' };
+    const scoreLabels = ['','严重不足','有待改善','基本合格','做得不错','非常理想'];
+
+    // 动态生成题目
+    const area = document.getElementById('questions-area');
+    let currentGroup = '';
+    questions.forEach((q, idx) => {
+        if (q.group !== currentGroup) {
+            currentGroup = q.group;
+            const heading = document.createElement('div');
+            heading.className = 'group-heading';
+            heading.textContent = currentGroup;
+            area.appendChild(heading);
+        }
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+            <div class="question-label">${q.star}</div>
+            <div class="question-desc">${q.title}</div>
+            <div class="select-wrapper">
+                <select id="q${idx}" data-idx="${idx}">
+                    <option value="">—— 请选择分数 ——</option>
+                    <option value="1">1分 · ${q.hints[0]}</option>
+                    <option value="2">2分 · ${q.hints[1]}</option>
+                    <option value="3">3分 · ${q.hints[2]}</option>
+                    <option value="4">4分 · ${q.hints[3]}</option>
+                    <option value="5">5分 · ${q.hints[4]}</option>
+                </select>
+            </div>`;
+        area.appendChild(card);
+    });
+
+    window.myChart = null;
+
+    window.generateChart = function() {
+        const scores = [];
+        for (let i = 0; i < questions.length; i++) {
+            const sel = document.getElementById('q' + i);
+            const val = parseInt(sel.value);
+            if (isNaN(val)) {
+                alert('请先完成所有题目再生成星盘图。\n\n未填写：第' + (i+1) + '题 「' + questions[i].star + '」');
+                sel.focus();
+                return;
+            }
+            scores.push(val);
+        }
+
+        const groups = ['东方青龙·空间基础','北方玄武·空间内功','西方白虎·空间功能','南方朱雀·空间关系'];
+        const groupScores = {}; groups.forEach(g => groupScores[g]=0);
+        const groupCounts = {}; groups.forEach(g => groupCounts[g]=0);
+        questions.forEach((q, idx) => { groupScores[q.group] += scores[idx]; groupCounts[q.group]++; });
+
+        // 统计卡片
+        const statsArea = document.getElementById('stats-area');
+        statsArea.innerHTML = '';
+        const totalSum = scores.reduce((a,b)=>a+b,0);
+        const totalAvg = (totalSum/28).toFixed(1);
+        groups.forEach(g => {
+            const avg = (groupScores[g]/7).toFixed(1);
+            let barColor = avg<2.5?'#c0392b':avg<3.5?'#f1c40f':'#2ecc71';
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            card.innerHTML = `
+                <div class="stat-label">${g}</div>
+                <div class="stat-value">${avg}<span style="font-size:14px;color:#8b7a56;">/5</span></div>
+                <div class="stat-bar" style="width:${(avg/5)*100}%; background:${barColor};"></div>`;
+            statsArea.appendChild(card);
+        });
+        const totalCard = document.createElement('div');
+        totalCard.className = 'stat-card';
+        totalCard.style.gridColumn = '1 / -1';
+        totalCard.innerHTML = `<div class="stat-label">✦ 28项总均分</div><div class="stat-value">${totalAvg}<span style="font-size:14px;color:#8b7a56;">/5</span></div>`;
+        statsArea.appendChild(totalCard);
+
+        // 旭日图数据
+        const sunData = [];
+        groups.forEach(g => {
+            const children = [];
+            questions.forEach((q,idx)=>{
+                if(q.group===g) children.push({ name: q.star, value: scores[idx], itemStyle:{color:colorMap[scores[idx]]}, label:{show:true, fontSize:9} });
+            });
+            sunData.push({ name: g, children, itemStyle:{color:'#2a2318'} });
+        });
+
+        // 显示图表
+        const wrapper = document.getElementById('chart-wrapper');
+        wrapper.classList.add('show');
+        const chartDom = document.getElementById('sunburst-chart');
+        if(window.myChart) window.myChart.dispose();
+        window.myChart = echarts.init(chartDom);
+        window.myChart.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: function(p) {
+                    if(p.data.children && p.data.children.length>0) {
+                        const g = p.name;
+                        const avg = (groupScores[g]/7).toFixed(1);
+                        return `<b>${g}</b><br/>均分：${avg}/5`;
+                    }
+                    return `<b>${p.name}</b><br/>得分：${p.value}分 · ${scoreLabels[p.value]}`;
+                }
+            },
+            series: [{
+                type: 'sunburst',
+                data: sunData,
+                radius: ['8%','88%'],
+                nodeClick: false,
+                label: { rotate:'radial', fontSize:10, color:'#e6ddcc' },
+                itemStyle: { borderColor:'#0b0a08', borderWidth:1.5 },
+                emphasis: { label:{fontSize:14,fontWeight:'bold'}, itemStyle:{borderWidth:2,borderColor:'#c9a85b'} },
+                levels: [
+                    {},
+                    { label:{fontSize:13,fontWeight:'bold'}, itemStyle:{color:'#2a2318'} },
+                    { label:{fontSize:9}, itemStyle:{} }
+                ]
+            }]
+        });
+
+        // 解读区域
+        const readingDiv = document.getElementById('reading-content');
+        readingDiv.innerHTML = '';
+        groups.forEach(g => {
+            const avg = (groupScores[g]/7).toFixed(1);
+            let status, dotColor;
+            if(avg<2.5){ status='急需改善'; dotColor='#c0392b'; }
+            else if(avg<3.5){ status='基本合格，有提升空间'; dotColor='#f1c40f'; }
+            else { status='状态良好，可保持优势'; dotColor='#2ecc71'; }
+            const p = document.createElement('p');
+            p.innerHTML = `<span class="dot-inline" style="background:${dotColor};box-shadow:0 0 8px ${dotColor};"></span><b>${g}</b> 均分 ${avg}/5 —— ${status}`;
+            readingDiv.appendChild(p);
+        });
+        const readingArea = document.getElementById('reading-area');
+        readingArea.classList.add('show');
+
+        // 平滑滚动到图表
+        wrapper.scrollIntoView({behavior:'smooth', block:'start'});
+    };
+})();
+</script>
+</body>
+</html>
